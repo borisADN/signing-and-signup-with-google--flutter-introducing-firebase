@@ -93,7 +93,7 @@ class _LoginPageState extends State<LoginPage> {
                             }
                           },
                     child:
-                        isLoading ? CircularProgressIndicator() : Text('Login'),
+                        isLoading ? CircularProgressIndicator() : Text('Se connecter'),
                   ))
             ])),
       ),
