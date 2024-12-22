@@ -13,8 +13,10 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _passwordConfirmationController = TextEditingController();
 
   bool isLoading = false;
+  bool _forLogin = true;
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +25,7 @@ class _LoginPageState extends State<LoginPage> {
         centerTitle: true,
         surfaceTintColor: Colors.yellow,
         elevation: 12,
-        title: Text('Login Page'),
+        title: Text(_forLogin ? "Login Page " : "Register Page"),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -57,6 +59,28 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 validator: (value) => value!.isEmpty ? 'Enter password' : null,
               ),
+              SizedBox(height: 16),
+              //confirmation password text field here
+              if (!_forLogin)
+                TextFormField(
+                  obscureText: true,
+                  controller: _passwordConfirmationController,
+                  decoration: InputDecoration(
+                      prefixIcon: Icon(Icons.lock),
+                      labelText: 'Confirm Password',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: Colors.black),
+                      )),
+                  validator: (value) {
+                    if (value!.isEmpty) return 'Confirm password';
+                    // return value!.isEmpty ? 'Confirm password' : null;
+                    if (_passwordController.text != value) {
+                      return 'Passwords do not match';
+                    }
+                    return null;
+                  },
+                ),
               const SizedBox(height: 16),
               Container(
                   width: double.infinity,
@@ -64,16 +88,23 @@ class _LoginPageState extends State<LoginPage> {
                     onPressed: isLoading
                         ? null
                         : () async {
-                            setState(() {
-                              isLoading = true;
-                            });
                             if (_formKey.currentState!.validate()) {
+                              setState(() {
+                                isLoading = true;
+                              });
                               // Perform login logic here
                               try {
-                                await Auth().signInWithEmailAndPassword(
-                                  _emailController.text,
-                                  _passwordController.text,
-                                );
+                                if (_forLogin) {
+                                  await Auth().signInWithEmailAndPassword(
+                                    _emailController.text,
+                                    _passwordController.text,
+                                  );
+                                } else {
+                                  await Auth().registerWithEmailAndPassword(
+                                    _emailController.text,
+                                    _passwordController.text,
+                                  );
+                                }
                                 setState(() {
                                   isLoading = false;
                                 });
@@ -92,9 +123,29 @@ class _LoginPageState extends State<LoginPage> {
                               }
                             }
                           },
-                    child:
-                        isLoading ? CircularProgressIndicator() : Text('Se connecter'),
-                  ))
+                    child: isLoading
+                        ? CircularProgressIndicator()
+                        : Text(_forLogin ? "Login" : "Register"),
+                  )),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      _emailController.text = "";
+                      _passwordController.text = "";
+                      _passwordConfirmationController.text = "";
+                      setState(() {
+                        _forLogin = !_forLogin;
+                      });
+                    },
+                    child: Text(_forLogin
+                        ? "No account? Sign up"
+                        : "Already have an account? Log in"),
+                  )
+                ],
+              )
             ])),
       ),
     );
