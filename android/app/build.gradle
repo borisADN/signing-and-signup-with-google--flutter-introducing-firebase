@@ -1,5 +1,5 @@
 plugins {
-    id "com.android.application"
+    id "com.android.application" 
     // START: FlutterFire Configuration
     id 'com.google.gms.google-services'
     // END: FlutterFire Configuration
@@ -14,12 +14,15 @@ android {
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8
+
+        // The Java version used for compiling your Kotlin code.
+        // Java 11 is required for Android SDK 31.
+        jvmTarget = JavaVersion.VERSION_21
     }
 
     defaultConfig {

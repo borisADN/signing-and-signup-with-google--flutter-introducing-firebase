@@ -31,122 +31,145 @@ class _LoginPageState extends State<LoginPage> {
         padding: const EdgeInsets.all(16),
         child: Form(
             key: _formKey,
-            child:
-                Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-              TextFormField(
-                controller: _emailController,
-                decoration: InputDecoration(
-                  prefixIcon: Icon(Icons.email),
-                  labelText: 'Email',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: Colors.black),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                TextFormField(
+                  controller: _emailController,
+                  decoration: InputDecoration(
+                    prefixIcon: Icon(Icons.email),
+                    labelText: 'Email',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: Colors.black),
+                    ),
                   ),
+                  validator: (value) => value!.isEmpty ? 'Enter email' : null,
                 ),
-                validator: (value) => value!.isEmpty ? 'Enter email' : null,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                obscureText: true,
-                controller: _passwordController,
-                decoration: InputDecoration(
-                  prefixIcon: Icon(Icons.lock),
-                  labelText: 'Password',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: Colors.black),
-                  ),
-                ),
-                validator: (value) => value!.isEmpty ? 'Enter password' : null,
-              ),
-              SizedBox(height: 16),
-              //confirmation password text field here
-              if (!_forLogin)
+                const SizedBox(height: 16),
                 TextFormField(
                   obscureText: true,
-                  controller: _passwordConfirmationController,
+                  controller: _passwordController,
                   decoration: InputDecoration(
-                      prefixIcon: Icon(Icons.lock),
-                      labelText: 'Confirm Password',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: Colors.black),
-                      )),
-                  validator: (value) {
-                    if (value!.isEmpty) return 'Confirm password';
-                    // return value!.isEmpty ? 'Confirm password' : null;
-                    if (_passwordController.text != value) {
-                      return 'Passwords do not match';
-                    }
-                    return null;
-                  },
+                    prefixIcon: Icon(Icons.lock),
+                    labelText: 'Password',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: Colors.black),
+                    ),
+                  ),
+                  validator: (value) =>
+                      value!.isEmpty ? 'Enter password' : null,
                 ),
-              const SizedBox(height: 16),
-              Container(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: isLoading
-                        ? null
-                        : () async {
-                            if (_formKey.currentState!.validate()) {
-                              setState(() {
-                                isLoading = true;
-                              });
-                              // Perform login logic here
-                              try {
-                                if (_forLogin) {
-                                  await Auth().signInWithEmailAndPassword(
-                                    _emailController.text,
-                                    _passwordController.text,
-                                  );
-                                } else {
-                                  await Auth().registerWithEmailAndPassword(
-                                    _emailController.text,
-                                    _passwordController.text,
+                SizedBox(height: 16),
+                //confirmation password text field here
+                if (!_forLogin)
+                  TextFormField(
+                    obscureText: true,
+                    controller: _passwordConfirmationController,
+                    decoration: InputDecoration(
+                        prefixIcon: Icon(Icons.lock),
+                        labelText: 'Confirm Password',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: Colors.black),
+                        )),
+                    validator: (value) {
+                      if (value!.isEmpty) return 'Confirm password';
+                      // return value!.isEmpty ? 'Confirm password' : null;
+                      if (_passwordController.text != value) {
+                        return 'Passwords do not match';
+                      }
+                      return null;
+                    },
+                  ),
+                const SizedBox(height: 16),
+                Container(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: isLoading
+                          ? null
+                          : () async {
+                              if (_formKey.currentState!.validate()) {
+                                setState(() {
+                                  isLoading = true;
+                                });
+                                // Perform login logic here
+                                try {
+                                  if (_forLogin) {
+                                    await Auth().signInWithEmailAndPassword(
+                                      _emailController.text,
+                                      _passwordController.text,
+                                    );
+                                  } else {
+                                    await Auth().registerWithEmailAndPassword(
+                                      _emailController.text,
+                                      _passwordController.text,
+                                    );
+                                  }
+                                  setState(() {
+                                    isLoading = false;
+                                  });
+                                } on FirebaseAuthException catch (e) {
+                                  setState(() {
+                                    isLoading = false;
+                                  });
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text("${e.message}"),
+                                      behavior: SnackBarBehavior.floating,
+                                      backgroundColor: Colors.red,
+                                      showCloseIcon: true,
+                                    ),
                                   );
                                 }
-                                setState(() {
-                                  isLoading = false;
-                                });
-                              } on FirebaseAuthException catch (e) {
-                                setState(() {
-                                  isLoading = false;
-                                });
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text("${e.message}"),
-                                    behavior: SnackBarBehavior.floating,
-                                    backgroundColor: Colors.red,
-                                    showCloseIcon: true,
-                                  ),
-                                );
                               }
-                            }
-                          },
-                    child: isLoading
-                        ? CircularProgressIndicator()
-                        : Text(_forLogin ? "Login" : "Register"),
-                  )),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  TextButton(
-                    onPressed: () {
-                      _emailController.text = "";
-                      _passwordController.text = "";
-                      _passwordConfirmationController.text = "";
-                      setState(() {
-                        _forLogin = !_forLogin;
-                      });
-                    },
-                    child: Text(_forLogin
-                        ? "No account? Sign up"
-                        : "Already have an account? Log in"),
-                  )
-                ],
-              )
-            ])),
+                            },
+                      child: isLoading
+                          ? CircularProgressIndicator()
+                          : Text(_forLogin ? "Login" : "Register"),
+                    )),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        _emailController.text = "";
+                        _passwordController.text = "";
+                        _passwordConfirmationController.text = "";
+                        setState(() {
+                          _forLogin = !_forLogin;
+                        });
+                      },
+                      child: Text(_forLogin
+                          ? "No account? Sign up"
+                          : "Already have an account? Log in"),
+                    )
+                  ],
+                ),
+                Divider(color: Colors.black),
+                SizedBox(height: 16),
+                ElevatedButton.icon(
+                  onPressed: () async {
+                    Auth().signInWithGoogle();
+
+                    // final GoogleSignInAccount? googleUser =
+                    //     await GoogleSignIn().signIn();
+                    // final GoogleSignInAuthentication? googleAuth =
+                    //     await googleUser?.authentication;
+                    // final credential = GoogleAuthProvider.credential(
+                    //   accessToken: googleAuth?.accessToken,
+                    //   idToken: googleAuth?.idToken,
+                    // );
+                    // await FirebaseAuth.instance
+                    //     .signInWithCredential(credential);
+                  },
+                  icon: Image.asset("assets/images/google.png", height: 30),
+                  label: Text("Login with Google"),
+                ),
+              ],
+            )),
       ),
     );
   }
